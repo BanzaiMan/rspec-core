@@ -18,14 +18,13 @@ echo "--------------------------------------------------------------------"
 echo
 
 if [[ $TRAVIS_RUBY_VERSION =~ ^jruby ]]; then
-	jruby --ng-server &
-	# idea taken from: http://blog.headius.com/2010/03/jruby-startup-time-tips.html
-	export JRUBY_OPTS='-X-C --ng' # disable JIT since these processes are so short lived
+	export JRUBY_OPTS='-X-C' # disable JIT since these processes are so short lived
+	bin/rspec -b --format progress `find spec -iname '*_spec.rb'`
+else
+	for file in `find spec -iname '*_spec.rb'`; do
+	  bin/rspec $file -b --format progress
+	done
 fi
-
-for file in `find spec -iname '*_spec.rb'`; do
-  bin/rspec $file -b --format progress
-done
 
 # Prepare RUBYOPT for scenarios that are shelling out to ruby,
 # and PATH for those that are using `rspec` or `rake`.
