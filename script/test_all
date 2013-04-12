@@ -5,9 +5,6 @@ set -e -x
 # Needed by Bundler 1.3: https://github.com/carlhuda/bundler/issues/2382
 export RUBYOPT='-rrbconfig'
 
-# idea taken from: http://blog.headius.com/2010/03/jruby-startup-time-tips.html
-export JRUBY_OPTS='-X-C' # disable JIT since these processes are so short lived
-
 echo "Bundling Standalone so we can run the specs w/o bundler loaded"
 
 bundle install --standalone --binstubs
@@ -19,6 +16,12 @@ bin/rspec spec -b --format progress --profile
 echo
 echo "--------------------------------------------------------------------"
 echo
+
+if [[ $TRAVIS_RUBY_VERSION =~ ^jruby ]]; then
+	jruby --ng-server &
+	# idea taken from: http://blog.headius.com/2010/03/jruby-startup-time-tips.html
+	export JRUBY_OPTS='-X-C --ng' # disable JIT since these processes are so short lived
+fi
 
 for file in `find spec -iname '*_spec.rb'`; do
   bin/rspec $file -b --format progress
